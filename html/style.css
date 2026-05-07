@@ -1,0 +1,122 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+}
+
+.page {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+#idLoading {
+  align-items: center;
+  background-color: #00000080;
+  cursor: wait;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100vw;
+}
+
+#idLoading.hide {
+  display: none;
+}
+
+.throbber {
+  background-color: white;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.throbber img {
+  animation: spin 1s linear infinite;
+  display: block;
+}
+
+#idLoading.hide .throbber img {
+  animation: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+header {
+  align-items: center;
+  background: linear-gradient(0deg, #c0c0c0, #e0e0e0);
+  border-bottom: 2px solid #9b3332;
+  column-gap: 8px;
+  display: flex;
+  font-size: 32px;
+  font-weight: bold;
+  padding: 8px;
+}
+
+main {
+  margin: 8px auto 8px auto;
+  max-width: 768px;
+  padding: 0 8px 0 8px;
+}
+
+button.fancy {
+  all: unset;
+  align-items: center;
+  background: linear-gradient(0deg, #c0c0c0, #e0e0e0);
+  border: 2px solid #9b3332;
+  border-radius: 8px;
+  column-gap: 4px;
+  cursor: pointer;
+  display: flex;
+  font-size: 24px;
+  font-weight: bold;
+  justify-content: center;
+  padding: 0 4px 0 4px;
+  user-select: none;
+}
+
+button.fancy:hover {
+  background: linear-gradient(0deg, #c0c0c0, #ffffff);
+}
+
+button.icon {
+  all: unset;
+  cursor: pointer;
+  user-select: none;
+}
+
+button.icon img {
+  display: block;
+}
+
+div.list {
+  border-top: 2px solid #b0b0b0;
+  border-left: 2px solid #b0b0b0;
+  border-right: 2px solid #b0b0b0;
+  margin: 16px 0;
+}
+
+div.listItem {
+  align-items: center;
+  padding: 2px;
+  display: flex;
+  border-bottom: 2px solid #b0b0b0;
+  gap: 2px;
+}
+
+div.listButtons {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+}

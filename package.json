@@ -1,0 +1,10 @@
+{
+  "name": "ekiermasz",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "src/index.js",
+  "type": "module",
+  "dependencies": {
+    "better-sqlite3": "^12.9.0"
+  }
+}

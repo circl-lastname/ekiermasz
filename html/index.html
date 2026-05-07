@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/logo.svg">
+    <script src="main.js" defer></script>
+    <title>eKiermasz</title>
+  </head>
+  <body>
+    <header><img src="assets/logo.svg" width="80" height="80" alt="logo">eKiermasz</header>
+    <main>
+      <div class="page" id="idPage_logIn">
+        <h1>Zaloguj się</h1>
+        <p><input type="password" id="idLogInPassword" placeholder="Hasło"></p>
+        <p><button id="idLogInButton">Zaloguj się</button></p>
+      </div>
+      <div class="page" id="idPage_main">
+        <h1>Strona główna</h1>
+        <p><button class="fancy" id="idMainAddBooks"><img src="assets/48/add.svg" width="48" height="48">Dodaj książki</button></p>
+        <p><button class="fancy"><img src="assets/48/shopping-cart.svg" width="48" height="48">Sprzedaj książki</button></p>
+        <p><button class="fancy" id="idMainSettings"><img src="assets/48/settings.svg" width="48" height="48">Ustawienia</button></p>
+      </div>
+      <div class="page" id="idPage_addBooks">
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <h1>Dodaj książki</h1>
+        <p>Zeskanuj kod kreskowy i wypełnij dane.</p>
+        <p>
+          <input type="text" id="idAddBooksISBN" placeholder="Kod kreskowy"><br>
+          <input type="text" id="idAddBooksSurname" placeholder="Nazwisko"><br>
+          <input type="text" id="idAddBooksName" placeholder="Imię"><br>
+          <input type="text" id="idAddBooksClass" list="idAddBooksClasses" placeholder="Klasa"><br>
+          <input type="number" id="idAddBooksPrice" min="0" step="0.01" placeholder="Cena"><br>
+        </p>
+        <p><button id="idAddBooksAdd">Dodaj</button></p>
+        <datalist id="idAddBooksClasses"></datalist>
+      </div>
+      <div class="page" id="idPage_settings">
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <h1>Ustawienia</h1>
+        <p><button class="fancy" id="idSettingsClasses"><img src="assets/48/group.svg" width="48" height="48">Klasy</button></p>
+      </div>
+      <div class="page" id="idPage_classes">
+        <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48">Ustawienia</button></p>
+        <h1>Klasy</h1>
+        <p><textarea id="idClassesNames" rows="10" placeholder="Nazwy"></textarea></p>
+        <p><button id="idClassesAdd">Dodaj</button></p>
+        <div class="list" id="idClassesList"></div>
+      </div>
+    </main>
+    <div id="idLoading"><div class="throbber"><img src="assets/48/progress-activity.svg" width="48" height="48"></div></div>
+  </body>
+</html>
