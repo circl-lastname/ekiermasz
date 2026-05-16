@@ -31,10 +31,17 @@
           <input type="text" id="idAddBooksSurname" placeholder="Nazwisko"><br>
           <input type="text" id="idAddBooksName" placeholder="Imię"><br>
           <input type="text" id="idAddBooksClass" list="idAddBooksClasses" placeholder="Klasa"><br>
-          <input type="number" id="idAddBooksPrice" min="0" step="0.01" placeholder="Cena"><br>
+          <input type="text" id="idAddBooksPrice" placeholder="Cena"><br>
         </p>
         <p><button id="idAddBooksAdd">Dodaj</button></p>
         <datalist id="idAddBooksClasses"></datalist>
+      </div>
+      <div class="page" id="idPage_bookAdded">
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <h1>Dodano książkę</h1>
+        <p>Należy wpisać ten kod ołówkiem na wewnętrzną okładkę lub pierwszą stronę książki:</p>
+        <h1 id="idBookAddedId"></h1>
+        <p><button id="idBookAddedAddMore">Dodaj następną</button></p>
       </div>
       <div class="page" id="idPage_settings">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>

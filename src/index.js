@@ -3,24 +3,22 @@ import * as http from "node:http";
 import * as https from "node:https";
 
 import { db, initDatabase } from "./db.js";
-import { Mutex } from "./mutex.js";
+import { startLookupTask, enqueueBarcode } from "./barcodeLookup.js";
 
 export let config;
-const dbBarcodesMutex = new Mutex();
 
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }
 
 const defaultConfig = {
-  // Protocol 
   port: 6257,
   useHttps: false,
   httpsKeyFile: null,
   httpsCertFile: null,
   allowedOrigin: "PLACEHOLDER",
-  // Environment
-  dbFile: "db.sqlite"
+  dbFile: "db.sqlite",
+  googleApiKey: "PLACEHOLDER"
 };
 
 console.log("eKiermasz Server");
@@ -39,6 +37,7 @@ try {
 }
 
 initDatabase();
+startLookupTask();
 
 function handleRequest(req, res) {
   console.log(`${req.socket.remoteAddress}: ${req.method} ${req.url}`);
@@ -93,7 +92,7 @@ function handleRequest(req, res) {
   }
 }
 
-async function processRequest(req, data, res) {
+function processRequest(req, data, res) {
   switch (req.url) {
     case "/getToken": {
       if (req.method !== "POST") {
@@ -242,35 +241,11 @@ async function processRequest(req, data, res) {
         } else {
           sellerId = db.prepare("SELECT id FROM sellers WHERE name = ? AND surname = ? AND classId = ?").get(name, surname, classId).id;
         }
-        console.log(sellerId, classId);
-        
-        let lock = await dbBarcodesMutex.acquire();
         
         if (!db.prepare("SELECT 1 FROM barcodes WHERE id = ?").get(data.isbn)) {
-          let googleRes = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${data.isbn}`);
-          let title = "Nieznana książka";
-          let subtitle = "";
-          console.log(googleRes);
-          if (googleRes.ok) {
-            let googleJson = await googleRes.json();
-            console.log(JSON.stringify(googleJson));
-            
-            if (googleJson.totalItems > 0) {
-              if (googleJson.items[0].volumeInfo.title) {
-                title = googleJson.items[0].volumeInfo.title;
-              }
-              
-              if (googleJson.items[0].volumeInfo.subtitle) {
-                subtitle = googleJson.items[0].volumeInfo.subtitle;
-              }
-            }
-          }
-          
-          db.prepare("INSERT INTO barcodes (id, title, subtitle, confirmed) VALUES (?, ?, ?, ?)").run(data.isbn, title, subtitle, 0);
-          console.log(title, subtitle);
+          db.prepare("INSERT INTO barcodes (id, title, subtitle, confirmed) VALUES (?, ?, ?, ?)").run(data.isbn, "Nieznana książka", "", 0);
+          enqueueBarcode(data.isbn);
         }
-        
-        lock.release();
         
         let bookId = db.prepare("INSERT INTO books (isbn, sellerId, price, sold) VALUES (?, ?, ?, ?)").run(data.isbn, sellerId, data.price, 0).lastInsertRowid;
         

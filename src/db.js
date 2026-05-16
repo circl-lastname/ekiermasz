@@ -45,6 +45,7 @@ export function initDatabase() {
       sellerId INTEGER NOT NULL,
       price INTEGER NOT NULL,
       sold INTEGER NOT NULL CHECK (sold in (0, 1)),
+      FOREIGN KEY (isbn) REFERENCES barcodes(id) ON DELETE CASCADE,
       FOREIGN KEY (sellerId) REFERENCES sellers(id) ON DELETE CASCADE
     );
   `);

@@ -5,6 +5,7 @@ let token;
 let currentPage;
 let loadingCounter = 1;
 let init = {};
+let lateInit = {};
 
 let classes = [];
 let classLookup = {};
@@ -104,6 +105,10 @@ function setPage(page) {
   }
   
   document.getElementById(`idPage_${page}`).classList.add("show");
+  
+  if (lateInit[page]) {
+    lateInit[page]();
+  }
 }
 
 function loading(state) {
@@ -213,12 +218,22 @@ idAddBooksAdd.addEventListener("click", async () => {
   });
   
   if (response.status === 200) {
-    console.log(response.data);
+    idBookAddedId.innerText = response.data.id.toString().padStart(3, "0");
+    setPage("bookAdded");
   } else {
     alert("Błąd podczas dodawania książki");
   }
   
   loading(false);
+});
+
+// ---------- bookAdded
+lateInit.bookAdded = () => {
+  idBookAddedAddMore.focus();
+};
+
+idBookAddedAddMore.addEventListener("click", () => {
+  setPage("addBooks");
 });
 
 // ---------- settings
@@ -253,7 +268,7 @@ init.classes = async (dontReload, dontFocus) => {
             if (response.status === 200) {
               classes = response.data.classes;
               updateDatalist();
-              await init.classes(true, false);
+              await init.classes(true, true);
               loading(false);
             } else {
               loading(false);
@@ -262,7 +277,7 @@ init.classes = async (dontReload, dontFocus) => {
           }
         }),
         makeIconButton("assets/24/delete.svg", async () => {
-          if (confirm(`Napewno usunąć klasę ${_class.name}?`)) {
+          if (confirm(`Na pewno usunąć klasę ${_class.name}?`)) {
             loading(true);
             
             let response = await request("/deleteClass", { id: _class.id });
@@ -270,7 +285,7 @@ init.classes = async (dontReload, dontFocus) => {
             if (response.status === 200) {
               classes = response.data.classes;
               updateDatalist();
-              await init.classes(true, false);
+              await init.classes(true, true);
               loading(false);
             } else {
               loading(false);
@@ -296,7 +311,7 @@ idClassesAdd.addEventListener("click", async () => {
   if (response.status === 200) {
     classes = response.data.classes;
     updateDatalist();
-    await init.classes(true, true);
+    await init.classes(true, false);
     loading(false);
   } else {
     loading(false);
