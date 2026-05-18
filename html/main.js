@@ -1,4 +1,5 @@
-const server = "http://localhost:6257";
+// In file config.js
+// const server = "PLACEHOLDER";
 
 let token;
 
