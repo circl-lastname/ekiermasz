@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as http from "node:http";
 import * as https from "node:https";
+import { randomBytes } from "node:crypto";
 
 import { db, initDatabase } from "./db.js";
 import { startLookupTask, enqueueBarcode } from "./barcodeLookup.js";
@@ -128,6 +129,35 @@ function processRequest(req, data, res) {
       res.end(JSON.stringify({
         verified: true
       }));
+    } break;
+    case "/changePassword": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.oldPassword === "string" && typeof data.newPassword === "string") {
+        let state = db.prepare("SELECT password FROM state").get();
+        
+        if (data.oldPassword !== state.password) {
+          res.statusCode = 403;
+          res.end();
+          return;
+        }
+        
+        let newToken = randomBytes(24).toString("base64");
+        
+        db.prepare("UPDATE state SET password = ?, token = ?").run(data.newPassword, newToken);
+        
+        res.end(JSON.stringify({
+          token: newToken
+        }));
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
     } break;
     case "/getClasses": {
       if (!checkAuth(req) || req.method !== "GET") {

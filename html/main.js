@@ -65,8 +65,8 @@ function make(name, ...childrenOrAttributes) {
   return element;
 }
 
-function makeIconButton(icon, callback) {
-  return make("button", { classes: [ "icon" ], onclick: callback }, make("img", { src: icon, height: "24", width: "24" }));
+function makeIconButton(title, icon, callback) {
+  return make("button", { classes: [ "icon" ], title: title, onclick: callback }, make("img", { src: icon, height: "24", width: "24", alt: title }));
 }
 
 async function loadClasses() {
@@ -237,13 +237,54 @@ idBookAddedAddMore.addEventListener("click", () => {
 });
 
 // ---------- settings
+idSettingsPassword.addEventListener("click", () => {
+  setPage("password");
+});
+
 idSettingsClasses.addEventListener("click", () => {
   setPage("classes");
+});
+
+// ---------- password
+init.password = () => {
+  idPasswordOld.value = "";
+  idPasswordNew.value = "";
+  idPasswordConfirm.value = "";
+};
+
+idPasswordSave.addEventListener("click", async () => {
+  if (idPasswordNew.value !== idPasswordConfirm.value) {
+    alert("Hasła nie pasują");
+    return;
+  }
+  
+  loading(true);
+  
+  let response = await request("/changePassword", {
+    oldPassword: idPasswordOld.value,
+    newPassword: idPasswordNew.value
+  });
+  
+  if (response.status === 200) {
+    token = response.data.token;
+    localStorage.token = response.data.token;
+    setPage("settings");
+    loading(false);
+  } else if (response.status === 403) {
+    idPasswordOld.value = "";
+    loading(false);
+    alert("Złe stare hasło");
+  } else {
+    loading(false);
+    alert("Błąd podczas zmiany hasła");
+  }
 });
 
 // ---------- classes
 init.classes = async (dontReload, dontFocus) => {
   idClassesNames.value = "";
+  
+  idClassesList.replaceChildren();
   
   if (!dontReload) {
     loading(true);
@@ -251,13 +292,11 @@ init.classes = async (dontReload, dontFocus) => {
     loading(false);
   }
   
-  idClassesList.replaceChildren();
-  
   for (let _class of classes) {
-    idClassesList.append(make("div", { classes: [ "listItem" ] },
-      _class.name,
-      make("div", { classes: [ "listButtons" ] },
-        makeIconButton("assets/24/edit.svg", async () => {
+    idClassesList.append(make("tr", { classes: [ "listItem" ] },
+      make("td", _class.name),
+      make("td", { classes: [ "listButtons" ] },
+        makeIconButton("Zmień nazwę", "assets/24/edit.svg", async () => {
           let answer = prompt(`Nowa nazwa klasy ${_class.name}?`, _class.name);
           
           if (answer !== null) {
@@ -276,8 +315,8 @@ init.classes = async (dontReload, dontFocus) => {
             }
           }
         }),
-        makeIconButton("assets/24/delete.svg", async () => {
-          if (confirm(`Na pewno usunąć klasę ${_class.name}?`)) {
+        makeIconButton("Usuń", "assets/24/delete.svg", async () => {
+          if (confirm(`Na pewno usunąć klasę ${_class.name}? **Wszystkie książki powiązane z nią zostaną również usunięte!**`)) {
             loading(true);
             
             let response = await request("/deleteClass", { id: _class.id });

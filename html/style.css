@@ -94,6 +94,7 @@ button.icon {
   all: unset;
   cursor: pointer;
   user-select: none;
+  vertical-align: middle;
 }
 
 button.icon img {
@@ -108,4 +109,8 @@ table {
 th, td {
   border: 1px solid black;
   padding: 3px;
+}
+
+th {
+  background: linear-gradient(0deg, #c0c0c0, #e0e0e0);
 }

@@ -9,7 +9,7 @@
     <title>eKiermasz</title>
   </head>
   <body>
-    <header><img src="assets/logo.svg" width="80" height="80" alt="logo">eKiermasz</header>
+    <header><img src="assets/logo.svg" width="80" height="80" alt="ZSP">eKiermasz</header>
     <main>
       <div class="page" id="idPage_logIn">
         <h1>Zaloguj się</h1>
@@ -18,12 +18,12 @@
       </div>
       <div class="page" id="idPage_main">
         <h1>Strona główna</h1>
-        <p><button class="fancy" id="idMainAddBooks"><img src="assets/48/add.svg" width="48" height="48">Dodaj książki</button></p>
-        <p><button class="fancy"><img src="assets/48/shopping-cart.svg" width="48" height="48">Sprzedaj książki</button></p>
-        <p><button class="fancy" id="idMainSettings"><img src="assets/48/settings.svg" width="48" height="48">Ustawienia</button></p>
+        <p><button class="fancy" id="idMainAddBooks"><img src="assets/48/add.svg" width="48" height="48" alt="Dodaj książki">Dodaj książki</button></p>
+        <p><button class="fancy" id="idMainSellBooks"><img src="assets/48/shopping-cart.svg" width="48" height="48" alt="Sprzedaj książki">Sprzedaj książki</button></p>
+        <p><button class="fancy" id="idMainSettings"><img src="assets/48/settings.svg" width="48" height="48" alt="Ustawienia">Ustawienia</button></p>
       </div>
       <div class="page" id="idPage_addBooks">
-        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Dodaj książki</h1>
         <p>Zeskanuj kod kreskowy i wypełnij dane.</p>
         <p>
@@ -37,25 +37,41 @@
         <datalist id="idAddBooksClasses"></datalist>
       </div>
       <div class="page" id="idPage_bookAdded">
-        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Dodano książkę</h1>
         <p>Należy wpisać ten kod ołówkiem na wewnętrzną okładkę lub pierwszą stronę książki:</p>
         <h1 id="idBookAddedId"></h1>
         <p><button id="idBookAddedAddMore">Dodaj następną</button></p>
       </div>
       <div class="page" id="idPage_settings">
-        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48">Strona główna</button></p>
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Ustawienia</h1>
-        <p><button class="fancy" id="idSettingsClasses"><img src="assets/48/group.svg" width="48" height="48">Klasy</button></p>
+        <p><button class="fancy" id="idSettingsPassword"><img src="assets/48/key.svg" width="48" height="48" alt="Zmień hasło">Zmień hasło</button></p>
+        <p><button class="fancy" id="idSettingsClasses"><img src="assets/48/group.svg" width="48" height="48" alt="Klasy">Klasy</button></p>
+      </div>
+      <div class="page" id="idPage_password">
+        <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48" alt="Ustawienia">Ustawienia</button></p>
+        <h1>Zmień hasło</h1>
+        <p><input type="password" id="idPasswordOld" placeholder="Stare hasło"></p>
+        <p>
+          <input type="password" id="idPasswordNew" placeholder="Nowe hasło"><br>
+          <input type="password" id="idPasswordConfirm" placeholder="Potwierdź nowe hasło">
+        </p>
+        <p><button id="idPasswordSave">Zapisz</button></p>
       </div>
       <div class="page" id="idPage_classes">
-        <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48">Ustawienia</button></p>
+        <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48" alt="Ustawienia">Ustawienia</button></p>
         <h1>Klasy</h1>
         <p><textarea id="idClassesNames" rows="10" placeholder="Nazwy"></textarea></p>
         <p><button id="idClassesAdd">Dodaj</button></p>
-        <div class="list" id="idClassesList"></div>
+        <table>
+          <thead>
+            <tr><th>Nazwa</th><th>Czynności</th></tr>
+          </thead>
+          <tbody id="idClassesList"></tbody>
+        </table>
       </div>
     </main>
-    <div id="idLoading"><div class="throbber"><img src="assets/48/progress-activity.svg" width="48" height="48"></div></div>
+    <div id="idLoading"><div class="throbber"><img src="assets/48/progress-activity.svg" width="48" height="48" alt="Ładowanie"></div></div>
   </body>
 </html>
