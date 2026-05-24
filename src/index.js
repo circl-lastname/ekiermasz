@@ -159,6 +159,40 @@ function processRequest(req, data, res) {
         return;
       }
     } break;
+    case "/getFee": {
+      if (!checkAuth(req) || req.method !== "GET") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let state = db.prepare("SELECT fee FROM state").get();
+      
+      res.end(JSON.stringify({
+        fee: state.fee
+      }));
+    } break;
+    case "/changeFee": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.fee === "number") {
+        let newFee = Math.floor(data.fee);
+        
+        db.prepare("UPDATE state SET fee = ?").run(newFee);
+        
+        res.end(JSON.stringify({
+          fee: newFee
+        }));
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+    } break;
     case "/getClasses": {
       if (!checkAuth(req) || req.method !== "GET") {
         res.statusCode = 400;

@@ -144,6 +144,10 @@ function parsePrice(price) {
   return sum;
 }
 
+function toPrice(price) {
+  return `${Math.floor(price / 100)},${(price % 100).toString().padStart(2, "0")}`;
+}
+
 for (let button of document.querySelectorAll(".goHome")) {
   button.addEventListener("click", () => {
     setPage("main");
@@ -242,8 +246,43 @@ idSettingsPassword.addEventListener("click", () => {
   setPage("password");
 });
 
+idSettingsFee.addEventListener("click", () => {
+  setPage("fee");
+});
+
 idSettingsClasses.addEventListener("click", () => {
   setPage("classes");
+});
+
+// ---------- fee
+init.fee = async () => {
+  loading(true);
+  let response = await request("/getFee");
+  loading(false);
+  
+  if (response.status === 200) {
+    idFeeInput.value = toPrice(response.data.fee);
+  } else {
+    alert("Błąd podczas pobierania opłaty")
+  }
+};
+
+idFeeSave.addEventListener("click", async () => {
+  loading(true);
+  
+  let fee = parsePrice(idFeeInput.value);
+  
+  let response = await request("/changeFee", {
+    fee: fee
+  });
+  
+  if (response.status === 200) {
+    idFeeInput.value = toPrice(response.data.fee);
+    loading(false);
+  } else {
+    loading(false);
+    alert("Błąd podczas zmiany opłaty")
+  }
 });
 
 // ---------- password
@@ -294,9 +333,9 @@ init.classes = async (dontReload, dontFocus) => {
   }
   
   for (let _class of classes) {
-    idClassesList.append(make("tr", { classes: [ "listItem" ] },
+    idClassesList.append(make("tr",
       make("td", _class.name),
-      make("td", { classes: [ "listButtons" ] },
+      make("td",
         makeIconButton("Zmień nazwę", "assets/24/edit.svg", async () => {
           let answer = prompt(`Nowa nazwa klasy ${_class.name}?`, _class.name);
           
