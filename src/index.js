@@ -322,6 +322,19 @@ function processRequest(req, data, res) {
         return;
       }
     } break;
+    case "/getBarcodes": {
+      if (!checkAuth(req) || req.method !== "GET") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let barcodes = db.prepare("SELECT id AS isbn, title, subtitle, confirmed FROM barcodes").all();
+      
+      res.end(JSON.stringify({
+        barcodes: barcodes
+      }));
+    } break;
     default: {
       res.statusCode = 404;
       res.end();
