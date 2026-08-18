@@ -19,13 +19,6 @@ export function initDatabase() {
       fee INTEGER NOT NULL
     );
     
-    CREATE TABLE IF NOT EXISTS barcodes (
-      id INTEGER PRIMARY KEY,
-      title TEXT NOT NULL,
-      subtitle TEXT NOT NULL,
-      confirmed INTEGER NOT NULL CHECK (confirmed in (0, 1))
-    );
-    
     CREATE TABLE IF NOT EXISTS classes (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL
@@ -41,11 +34,10 @@ export function initDatabase() {
     
     CREATE TABLE IF NOT EXISTS books (
       id INTEGER PRIMARY KEY,
-      isbn INTEGER NOT NULL,
+      title TEXT NOT NULL,
       sellerId INTEGER NOT NULL,
       price INTEGER NOT NULL,
       sold INTEGER NOT NULL CHECK (sold in (0, 1)),
-      FOREIGN KEY (isbn) REFERENCES barcodes(id) ON DELETE CASCADE,
       FOREIGN KEY (sellerId) REFERENCES sellers(id) ON DELETE CASCADE
     );
   `);

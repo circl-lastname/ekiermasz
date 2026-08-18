@@ -33,15 +33,15 @@
       <div class="page" id="idPage_addBooks">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Dodaj książki</h1>
-        <p>Zeskanuj kod kreskowy i wypełnij dane.</p>
         <p>
-          <input type="text" id="idAddBooksISBN" placeholder="Kod kreskowy"><br>
+          <input type="text" id="idAddBooksTitle" list="idAddBooksTitles" placeholder="Tytuł"><br>
           <input type="text" id="idAddBooksSurname" placeholder="Nazwisko"><br>
           <input type="text" id="idAddBooksName" placeholder="Imię"><br>
           <input type="text" id="idAddBooksClass" list="idAddBooksClasses" placeholder="Klasa"><br>
           <input type="text" id="idAddBooksPrice" placeholder="Cena"><br>
         </p>
         <p><button id="idAddBooksAdd">Dodaj</button></p>
+        <datalist id="idAddBooksTitles"></datalist>
         <datalist id="idAddBooksClasses"></datalist>
       </div>
       <div class="page" id="idPage_bookAdded">
@@ -57,7 +57,6 @@
         <p><button class="fancy" id="idSettingsPassword"><img src="assets/48/key.svg" width="48" height="48" alt="Zmień hasło">Zmień hasło</button></p>
         <p><button class="fancy" id="idSettingsFee"><img src="assets/48/payment-down.svg" width="48" height="48" alt="Zmień opłatę">Zmień opłatę</button></p>
         <p><button class="fancy" id="idSettingsClasses"><img src="assets/48/group.svg" width="48" height="48" alt="Klasy">Klasy</button></p>
-        <p><button class="fancy" id="idSettingsBarcodes"><img src="assets/48/barcode-scanner.svg" width="48" height="48" alt="Kody kreskowe">Kody kreskowe</button></p>
       </div>
       <div class="page" id="idPage_password">
         <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48" alt="Ustawienia">Ustawienia</button></p>
@@ -85,16 +84,6 @@
             <tr><th>Nazwa</th><th>Czynności</th></tr>
           </thead>
           <tbody id="idClassesList"></tbody>
-        </table>
-      </div>
-      <div class="page" id="idPage_barcodes">
-        <p><button class="fancy goSettings"><img src="assets/48/settings.svg" width="48" height="48" alt="Ustawienia">Ustawienia</button></p>
-        <h1>Kody kreskowe</h1>
-        <table>
-          <thead>
-            <tr><th>ISBN</th><th>Tytuł</th><th>Potwierdzony</th><th>Czynności</th></tr>
-          </thead>
-          <tbody id="idBarcodesList"></tbody>
         </table>
       </div>
     </main>

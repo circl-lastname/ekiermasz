@@ -195,27 +195,40 @@ idMainSettings.addEventListener("click", () => {
 
 // ---------- addBooks
 init.addBooks = async () => {
-  if (classes.length === 0) {
-    loading(true);
-    await loadClasses();
-    loading(false);
-  }
-  
-  idAddBooksISBN.value = "";
+  idAddBooksTitle.value = "";
   idAddBooksSurname.value = "";
   idAddBooksName.value = "";
   idAddBooksClass.value = "";
   idAddBooksPrice.value = "";
+  
+  loading(true);
+  
+  if (classes.length === 0) {
+    await loadClasses();
+  }
+  
+  let response = await request("/getBookTitles");
+  
+  if (response.status === 200) {
+    idAddBooksTitles.replaceChildren();
+    
+    for (let title of response.data.titles) {
+      idAddBooksTitles.append(make("option", { value: title }));
+    }
+  } else {
+    alert("Błąd podczas pobierania tytułów książek");
+  }
+  
+  loading(false);
 };
 
 idAddBooksAdd.addEventListener("click", async () => {
   loading(true);
   
-  let isbn = parseInt(idAddBooksISBN.value);
   let price = parsePrice(idAddBooksPrice.value);
   
   let response = await request("/addBook", {
-    isbn: isbn,
+    title: idAddBooksTitle.value,
     name: idAddBooksName.value,
     surname: idAddBooksSurname.value,
     class: idAddBooksClass.value.toUpperCase().trim(),
@@ -252,10 +265,6 @@ idSettingsFee.addEventListener("click", () => {
 
 idSettingsClasses.addEventListener("click", () => {
   setPage("classes");
-});
-
-idSettingsBarcodes.addEventListener("click", () => {
-  setPage("barcodes");
 });
 
 // ---------- password
@@ -401,36 +410,6 @@ idClassesAdd.addEventListener("click", async () => {
     alert("Błąd podczas dodawania klasy");
   }
 });
-
-// ---------- barcodes
-init.barcodes = async () => {
-  loading(true);
-  
-  idBarcodesList.replaceChildren();
-  
-  let response = await request("/getBarcodes");
-  
-  if (response.status === 200) {
-    for (let barcode of response.data.barcodes) {
-      idBarcodesList.append(make("tr",
-        make("td", barcode.isbn),
-        make("td", make("b", barcode.title), make("br"), barcode.subtitle),
-        make("td", barcode.confirmed ? "Tak" : "Nie"),
-        make("td",
-          makeIconButton("Zmień tytuły", "assets/24/edit.svg", () => {}),
-          barcode.confirmed
-            ? makeIconButton("Usuń potwierdzenie", "assets/24/thumb-down.svg", () => {})
-            : makeIconButton("Potwierdź", "assets/24/thumb-up.svg", () => {})
-        )
-      ));
-    }
-    
-    loading(false);
-  } else {
-    loading(false);
-    alert("Błąd podczas pobierania kodów kreskowych");
-  }
-};
 
 async function main() {
   if (localStorage.token) {

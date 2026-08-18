@@ -4,7 +4,6 @@ import * as https from "node:https";
 import { randomBytes } from "node:crypto";
 
 import { db, initDatabase } from "./db.js";
-import { startLookupTask, enqueueBarcode } from "./barcodeLookup.js";
 
 export let config;
 
@@ -38,7 +37,6 @@ try {
 }
 
 initDatabase();
-startLookupTask();
 
 function handleRequest(req, res) {
   console.log(`${req.socket.remoteAddress}: ${req.method} ${req.url}`);
@@ -283,6 +281,19 @@ function processRequest(req, data, res) {
         classes: classes
       }));
     } break;
+    case "/getBooks": {
+      if (!checkAuth(req) || req.method !== "GET") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let books = db.prepare("SELECT books.id, books.title, books.sellerId, sellers.name, sellers.surname, classes.name AS className, books.price, books.sold FROM books JOIN sellers ON books.sellerId = sellers.id JOIN classes ON sellers.classId = classes.id").all();
+      
+      res.end(JSON.stringify({
+        books: books
+      }));
+    } break;
     case "/addBook": {
       if (!checkAuth(req) || req.method !== "POST") {
         res.statusCode = 400;
@@ -290,11 +301,12 @@ function processRequest(req, data, res) {
         return;
       }
       
-      if (typeof data.isbn === "number" &&
+      if (typeof data.title === "string" && data.title.length > 0 &&
           typeof data.name === "string" && data.name.length > 0 &&
           typeof data.surname === "string" && data.surname.length > 0 &&
           typeof data.class === "string" && db.prepare("SELECT 1 FROM classes WHERE name = ?").get(data.class) &&
           typeof data.price === "number") {
+        let title = data.title.trim();
         let name = capitalize(data.name.trim());
         let surname = capitalize(data.surname.trim());
         let sellerId;
@@ -306,12 +318,7 @@ function processRequest(req, data, res) {
           sellerId = db.prepare("SELECT id FROM sellers WHERE name = ? AND surname = ? AND classId = ?").get(name, surname, classId).id;
         }
         
-        if (!db.prepare("SELECT 1 FROM barcodes WHERE id = ?").get(data.isbn)) {
-          db.prepare("INSERT INTO barcodes (id, title, subtitle, confirmed) VALUES (?, ?, ?, ?)").run(data.isbn, "Nieznana książka", "", 0);
-          enqueueBarcode(data.isbn);
-        }
-        
-        let bookId = db.prepare("INSERT INTO books (isbn, sellerId, price, sold) VALUES (?, ?, ?, ?)").run(data.isbn, sellerId, data.price, 0).lastInsertRowid;
+        let bookId = db.prepare("INSERT INTO books (title, sellerId, price, sold) VALUES (?, ?, ?, ?)").run(title, sellerId, data.price, 0).lastInsertRowid;
         
         res.end(JSON.stringify({
           id: bookId
@@ -322,17 +329,17 @@ function processRequest(req, data, res) {
         return;
       }
     } break;
-    case "/getBarcodes": {
+    case "/getBookTitles": {
       if (!checkAuth(req) || req.method !== "GET") {
         res.statusCode = 400;
         res.end();
         return;
       }
       
-      let barcodes = db.prepare("SELECT id AS isbn, title, subtitle, confirmed FROM barcodes").all();
+      let titles = db.prepare("SELECT DISTINCT title FROM books").pluck().all().sort();
       
       res.end(JSON.stringify({
-        barcodes: barcodes
+        titles: titles
       }));
     } break;
     default: {
