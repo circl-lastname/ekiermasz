@@ -33,15 +33,18 @@
       <div class="page" id="idPage_addBooks">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Dodaj książki</h1>
+        <p>Dane ksiązki:</p>
         <p>
-          <input type="text" id="idAddBooksTitle" list="idAddBooksTitles" placeholder="Tytuł"><br>
+          <input type="text" id="idAddBooksTitle" list="idBooksTitles" placeholder="Tytuł"><br>
+          <input type="text" id="idAddBooksPrice" placeholder="Cena"><br>
+        </p>
+        <p>Dane sprzedawcy:</p>
+        <p>
           <input type="text" id="idAddBooksSurname" placeholder="Nazwisko"><br>
           <input type="text" id="idAddBooksName" placeholder="Imię"><br>
           <input type="text" id="idAddBooksClass" list="idAddBooksClasses" placeholder="Klasa"><br>
-          <input type="text" id="idAddBooksPrice" placeholder="Cena"><br>
         </p>
         <p><button id="idAddBooksAdd">Dodaj</button></p>
-        <datalist id="idAddBooksTitles"></datalist>
         <datalist id="idAddBooksClasses"></datalist>
       </div>
       <div class="page" id="idPage_bookAdded">
@@ -50,6 +53,31 @@
         <p>Należy wpisać ten kod ołówkiem na wewnętrzną okładkę lub pierwszą stronę książki:</p>
         <h1 id="idBookAddedId"></h1>
         <p><button id="idBookAddedAddMore">Dodaj następną</button></p>
+      </div>
+      <div class="page" id="idPage_books">
+        <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
+        <h1>Książki</h1>
+        <p><button class="fancy goPrint"><img src="assets/48/print.svg" width="48" height="48" alt="Drukuj">Drukuj</button></p>
+        <p id="idBooksGenerated"></p>
+        <table>
+          <thead>
+            <tr><th>Kod</th><th>Tytuł</th><th>Sprzedawca</th><th>Cena</th><th>Sprzedana</th><th class="noPrint">Czynności</th></tr>
+            <tr class="noPrint">
+              <td><input type="number" id="idBooksSearchId" min="1" max="999" placeholder="Kod"></td>
+              <td><input type="text" id="idBooksSearchTitle" list="idBooksTitles" placeholder="Tytuł"></td>
+              <td colspan="2"></td>
+              <td>
+                <select id="idBooksSearchSold">
+                  <option>---</option>
+                  <option>Tak</option>
+                  <option>Nie</option>
+                </select>
+              </td>
+              <td><button id="idBooksSearchButton">Szukaj</button></td>
+            </tr>
+          </thead>
+          <tbody id="idBooksList"></tbody>
+        </table>
       </div>
       <div class="page" id="idPage_settings">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
@@ -88,5 +116,6 @@
       </div>
     </main>
     <div id="idLoading"><div class="throbber"><img src="assets/48/progress-activity.svg" width="48" height="48" alt="Ładowanie"></div></div>
+    <datalist id="idBooksTitles"></datalist>
   </body>
 </html>

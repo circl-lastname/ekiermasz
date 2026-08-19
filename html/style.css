@@ -86,8 +86,12 @@ button.fancy {
   user-select: none;
 }
 
-button.fancy:hover {
+button.fancy:hover, button.fancy:focus-visible {
   background: linear-gradient(0deg, #c0c0c0, #ffffff);
+}
+
+button.fancy:focus-visible {
+  border: 2px solid Highlight;
 }
 
 button.icon {
@@ -113,4 +117,14 @@ th, td {
 
 th {
   background: linear-gradient(0deg, #c0c0c0, #e0e0e0);
+}
+
+thead td {
+  background-color: #e0e0e0;
+}
+
+@media print {
+  header, button.fancy, .noPrint {
+    display: none;
+  }
 }

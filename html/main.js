@@ -75,7 +75,7 @@ async function loadClasses() {
   
   if (response.status === 200) {
     classes = response.data.classes;
-    updateDatalist();
+    updateClassesDatalist();
   } else {
     alert("Błąd podczas pobierania klas");
   }
@@ -86,7 +86,7 @@ async function loadClasses() {
   }
 }
 
-function updateDatalist() {
+function updateClassesDatalist() {
   idAddBooksClasses.replaceChildren();
   
   for (let _class of classes) {
@@ -94,7 +94,21 @@ function updateDatalist() {
   }
 }
 
-function setPage(page) {
+async function loadBookTitles() {
+  let response = await request("/getBookTitles");
+  
+  if (response.status === 200) {
+    idBooksTitles.replaceChildren();
+    
+    for (let title of response.data.titles) {
+      idBooksTitles.append(make("option", { value: title }));
+    }
+  } else {
+    alert("Błąd podczas pobierania tytułów książek");
+  }
+}
+
+function setPage(page, ...initArgs) {
   if (currentPage) {
     document.getElementById(`idPage_${currentPage}`).classList.remove("show");
   }
@@ -102,13 +116,13 @@ function setPage(page) {
   currentPage = page;
   
   if (init[page]) {
-    init[page]();
+    init[page](...initArgs);
   }
   
   document.getElementById(`idPage_${page}`).classList.add("show");
   
   if (lateInit[page]) {
-    lateInit[page]();
+    lateInit[page](...initArgs);
   }
 }
 
@@ -160,6 +174,12 @@ for (let button of document.querySelectorAll(".goSettings")) {
   });
 }
 
+for (let button of document.querySelectorAll(".goPrint")) {
+  button.addEventListener("click", () => {
+    print();
+  });
+}
+
 // ---------- logIn
 init.logIn = () => {
   idLogInPassword.value = "";
@@ -189,6 +209,10 @@ idMainAddBooks.addEventListener("click", () => {
   setPage("addBooks");
 });
 
+idMainBooks.addEventListener("click", () => {
+  setPage("books");
+});
+
 idMainSettings.addEventListener("click", () => {
   setPage("settings");
 });
@@ -207,17 +231,7 @@ init.addBooks = async () => {
     await loadClasses();
   }
   
-  let response = await request("/getBookTitles");
-  
-  if (response.status === 200) {
-    idAddBooksTitles.replaceChildren();
-    
-    for (let title of response.data.titles) {
-      idAddBooksTitles.append(make("option", { value: title }));
-    }
-  } else {
-    alert("Błąd podczas pobierania tytułów książek");
-  }
+  await loadBookTitles();
   
   loading(false);
 };
@@ -236,8 +250,7 @@ idAddBooksAdd.addEventListener("click", async () => {
   });
   
   if (response.status === 200) {
-    idBookAddedId.innerText = response.data.id.toString().padStart(3, "0");
-    setPage("bookAdded");
+    setPage("bookAdded", response.data.id.toString().padStart(3, "0"));
   } else {
     alert("Błąd podczas dodawania książki");
   }
@@ -246,12 +259,85 @@ idAddBooksAdd.addEventListener("click", async () => {
 });
 
 // ---------- bookAdded
+init.bookAdded = (bookId) => {
+  idBookAddedId.innerText = bookId;
+  idBookAddedAddMore.focus();
+};
+
 lateInit.bookAdded = () => {
   idBookAddedAddMore.focus();
 };
 
 idBookAddedAddMore.addEventListener("click", () => {
   setPage("addBooks");
+});
+
+// ---------- books
+init.books = async (dontClear) => {
+  loading(true);
+  
+  idBooksList.replaceChildren();
+  
+  if (!dontClear) {
+    idBooksSearchId.value = "";
+    idBooksSearchTitle.value = "";
+    idBooksSearchSold.value = "---";
+  }
+  
+  await loadBookTitles();
+  
+  let response = await request("/getBooks");
+  
+  if (response.status === 200) {
+    for (let book of response.data.books) {
+      if (idBooksSearchId.value) {
+        if (book.id !== parseInt(idBooksSearchId.value)) {
+          continue;
+        }
+      }
+      
+      if (idBooksSearchTitle.value) {
+        if (book.title !== idBooksSearchTitle.value) {
+          continue;
+        }
+      }
+      
+      if (idBooksSearchSold.value !== "---") {
+        if (!!book.sold !== (idBooksSearchSold.value === "Tak")) {
+          continue;
+        }
+      }
+      
+      idBooksList.append(make("tr",
+        make("td", book.id.toString().padStart(3, "0")),
+        make("td", book.title),
+        make("td", make("a", { href: "javascript:void(0);" }, `${book.surname}, ${book.name} (${book.className})`)),
+        make("td", `${toPrice(book.price)} zł`),
+        make("td", book.sold ? "Tak" : "Nie"),
+        make("td", { classes: [ "noPrint" ] },
+          makeIconButton("Zmień tytuł", "assets/24/edit.svg", async () => {
+            
+          }),
+          makeIconButton("Zmień cenę", "assets/24/price-change.svg", async () => {
+            
+          }),
+          makeIconButton("Usuń", "assets/24/delete.svg", async () => {
+            
+          }),
+        )
+      ));
+    }
+  } else {
+    alert("Błąd podczas pobierania książek");
+  }
+  
+  idBooksGenerated.innerText = `Wygenerowano ${new Date()}`;
+  
+  loading(false);
+};
+
+idBooksSearchButton.addEventListener("click", () => {
+  init.books(true);
 });
 
 // ---------- settings
@@ -359,7 +445,7 @@ init.classes = async (dontReload, dontFocus) => {
             
             if (response.status === 200) {
               classes = response.data.classes;
-              updateDatalist();
+              updateClassesDatalist();
               await init.classes(true, true);
               loading(false);
             } else {
@@ -376,7 +462,7 @@ init.classes = async (dontReload, dontFocus) => {
             
             if (response.status === 200) {
               classes = response.data.classes;
-              updateDatalist();
+              updateClassesDatalist();
               await init.classes(true, true);
               loading(false);
             } else {
@@ -402,7 +488,7 @@ idClassesAdd.addEventListener("click", async () => {
   
   if (response.status === 200) {
     classes = response.data.classes;
-    updateDatalist();
+    updateClassesDatalist();
     await init.classes(true, false);
     loading(false);
   } else {
