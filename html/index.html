@@ -57,13 +57,13 @@
       <div class="page" id="idPage_books">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Książki</h1>
-        <p><button class="fancy goPrint"><img src="assets/48/print.svg" width="48" height="48" alt="Drukuj">Drukuj</button></p>
+        <p><button class="fancy" id="idBooksPrintButton"><img src="assets/48/print.svg" width="48" height="48" alt="Drukuj">Drukuj</button></p>
         <p id="idBooksGenerated"></p>
         <table>
           <thead>
             <tr><th>Kod</th><th>Tytuł</th><th>Sprzedawca</th><th>Cena</th><th>Sprzedana</th><th class="noPrint">Czynności</th></tr>
             <tr class="noPrint">
-              <td><input type="number" id="idBooksSearchId" min="1" max="999" placeholder="Kod"></td>
+              <td><input type="number" id="idBooksSearchId" min="1" max="9999" placeholder="Kod"></td>
               <td><input type="text" id="idBooksSearchTitle" list="idBooksTitles" placeholder="Tytuł"></td>
               <td colspan="2"></td>
               <td>

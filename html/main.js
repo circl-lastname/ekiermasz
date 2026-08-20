@@ -1,12 +1,15 @@
 // In file config.js
 // const server = "PLACEHOLDER";
 
+// TODO: Backups and larger textboxes
+
 let token;
 
 let currentPage;
 let loadingCounter = 1;
 let init = {};
 let lateInit = {};
+let free = {};
 
 let classes = [];
 let classLookup = {};
@@ -111,6 +114,10 @@ async function loadBookTitles() {
 function setPage(page, ...initArgs) {
   if (currentPage) {
     document.getElementById(`idPage_${currentPage}`).classList.remove("show");
+    
+    if (free[currentPage]) {
+      free[currentPage]();
+    }
   }
   
   currentPage = page;
@@ -162,6 +169,14 @@ function toPrice(price) {
   return `${Math.floor(price / 100)},${(price % 100).toString().padStart(2, "0")}`;
 }
 
+function formatDateUser(date) {
+  return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
+}
+
+function formatDateFile(date) {
+  return `${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date.getHours().toString().padStart(2, "0")}${date.getMinutes().toString().padStart(2, "0")}${date.getSeconds().toString().padStart(2, "0")}`;
+}
+
 for (let button of document.querySelectorAll(".goHome")) {
   button.addEventListener("click", () => {
     setPage("main");
@@ -171,12 +186,6 @@ for (let button of document.querySelectorAll(".goHome")) {
 for (let button of document.querySelectorAll(".goSettings")) {
   button.addEventListener("click", () => {
     setPage("settings");
-  });
-}
-
-for (let button of document.querySelectorAll(".goPrint")) {
-  button.addEventListener("click", () => {
-    print();
   });
 }
 
@@ -273,71 +282,137 @@ idBookAddedAddMore.addEventListener("click", () => {
 });
 
 // ---------- books
-init.books = async (dontClear) => {
-  loading(true);
+let booksList = [];
+let booksGeneratedDate;
+
+function booksUpdateTable(updateDate) {
+  if (updateDate) {
+    booksGeneratedDate = new Date();
+    idBooksGenerated.innerText = `Stan na ${formatDateUser(booksGeneratedDate)}`;
+  }
   
   idBooksList.replaceChildren();
   
-  if (!dontClear) {
-    idBooksSearchId.value = "";
-    idBooksSearchTitle.value = "";
-    idBooksSearchSold.value = "---";
+  for (let book of booksList) {
+    if (idBooksSearchId.value) {
+      if (book.id !== parseInt(idBooksSearchId.value)) {
+        continue;
+      }
+    }
+    
+    if (idBooksSearchTitle.value) {
+      if (book.title !== idBooksSearchTitle.value) {
+        continue;
+      }
+    }
+    
+    if (idBooksSearchSold.value !== "---") {
+      if (!!book.sold !== (idBooksSearchSold.value === "Tak")) {
+        continue;
+      }
+    }
+    
+    idBooksList.append(make("tr",
+      make("td", book.id.toString().padStart(3, "0")),
+      make("td", book.title),
+      make("td", make("a", { href: "javascript:void(0);" }, `${book.surname}, ${book.name} (${book.className})`)),
+      make("td", `${toPrice(book.price)} zł`),
+      make("td", book.sold ? "Tak" : "Nie"),
+      make("td", { classes: [ "noPrint" ] },
+        makeIconButton("Zmień tytuł", "assets/24/edit.svg", async () => {
+          let answer = prompt(`Nowy tytuł książki ${book.id.toString().padStart(3, "0")}?`, book.title);
+          
+          if (answer !== null) {
+            loading(true);
+            
+            let response = await request("/changeBookTitle", { id: book.id, title: answer });
+            
+            if (response.status === 200) {
+              booksList = response.data.books;
+              booksUpdateTable(true);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas zmiany tytułu książki");
+            }
+          }
+        }),
+        makeIconButton("Zmień cenę", "assets/24/price-change.svg", async () => {
+          let answer = prompt(`Nowa cena książki ${book.id.toString().padStart(3, "0")}?`, toPrice(book.price));
+          
+          if (answer !== null) {
+            loading(true);
+            
+            let response = await request("/changeBookPrice", { id: book.id, price: parsePrice(answer) });
+            
+            if (response.status === 200) {
+              booksList = response.data.books;
+              booksUpdateTable(true);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas zmiany ceny książki");
+            }
+          }
+        }),
+        makeIconButton("Usuń", "assets/24/delete.svg", async () => {
+          if (confirm(`Na pewno usunąć książkę ${book.id.toString().padStart(3, "0")}?`)) {
+            loading(true);
+            
+            let response = await request("/deleteBook", { id: book.id });
+            
+            if (response.status === 200) {
+              booksList = response.data.books;
+              booksUpdateTable(true);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas usuwania książki");
+            }
+          }
+        }),
+      )
+    ));
   }
+}
+
+init.books = async () => {
+  loading(true);
+  
+  idBooksSearchId.value = "";
+  idBooksSearchTitle.value = "";
+  idBooksSearchSold.value = "---";
   
   await loadBookTitles();
   
   let response = await request("/getBooks");
   
   if (response.status === 200) {
-    for (let book of response.data.books) {
-      if (idBooksSearchId.value) {
-        if (book.id !== parseInt(idBooksSearchId.value)) {
-          continue;
-        }
-      }
-      
-      if (idBooksSearchTitle.value) {
-        if (book.title !== idBooksSearchTitle.value) {
-          continue;
-        }
-      }
-      
-      if (idBooksSearchSold.value !== "---") {
-        if (!!book.sold !== (idBooksSearchSold.value === "Tak")) {
-          continue;
-        }
-      }
-      
-      idBooksList.append(make("tr",
-        make("td", book.id.toString().padStart(3, "0")),
-        make("td", book.title),
-        make("td", make("a", { href: "javascript:void(0);" }, `${book.surname}, ${book.name} (${book.className})`)),
-        make("td", `${toPrice(book.price)} zł`),
-        make("td", book.sold ? "Tak" : "Nie"),
-        make("td", { classes: [ "noPrint" ] },
-          makeIconButton("Zmień tytuł", "assets/24/edit.svg", async () => {
-            
-          }),
-          makeIconButton("Zmień cenę", "assets/24/price-change.svg", async () => {
-            
-          }),
-          makeIconButton("Usuń", "assets/24/delete.svg", async () => {
-            
-          }),
-        )
-      ));
-    }
+    booksList = response.data.books;
+    booksUpdateTable(true);
   } else {
+    booksList = [];
+    idBooksGenerated.innerText = "";
     alert("Błąd podczas pobierania książek");
   }
-  
-  idBooksGenerated.innerText = `Wygenerowano ${new Date()}`;
   
   loading(false);
 };
 
+free.books = () => {
+  idBooksList.replaceChildren();
+  booksList = [];
+  booksGeneratedDate = undefined;
+};
+
+idBooksPrintButton.addEventListener("click", () => {
+  document.title = `eKiermasz_Ksiazki_${formatDateFile(booksGeneratedDate)}`;
+  print();
+  document.title = "eKiermasz";
+});
+
 idBooksSearchButton.addEventListener("click", () => {
-  init.books(true);
+  booksUpdateTable(false);
 });
 
 // ---------- settings

@@ -18,7 +18,6 @@ const defaultConfig = {
   httpsCertFile: null,
   allowedOrigin: "PLACEHOLDER",
   dbFile: "db.sqlite",
-  googleApiKey: "PLACEHOLDER"
 };
 
 console.log("eKiermasz Server");
@@ -328,6 +327,71 @@ function processRequest(req, data, res) {
         res.end();
         return;
       }
+    } break;
+    case "/deleteBook": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.id === "number" && db.prepare("SELECT 1 FROM books WHERE id = ?").get(data.id)) {
+        db.prepare("DELETE FROM books WHERE id = ?").run(data.id);
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let books = db.prepare("SELECT books.id, books.title, books.sellerId, sellers.name, sellers.surname, classes.name AS className, books.price, books.sold FROM books JOIN sellers ON books.sellerId = sellers.id JOIN classes ON sellers.classId = classes.id").all();
+      
+      res.end(JSON.stringify({
+        books: books
+      }));
+    } break;
+    case "/changeBookTitle": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.id === "number" && db.prepare("SELECT 1 FROM books WHERE id = ?").get(data.id) &&
+          typeof data.title === "string" && data.title.length > 0) {
+        db.prepare("UPDATE books SET title = ? WHERE id = ?").run(data.title.trim(), data.id);
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let books = db.prepare("SELECT books.id, books.title, books.sellerId, sellers.name, sellers.surname, classes.name AS className, books.price, books.sold FROM books JOIN sellers ON books.sellerId = sellers.id JOIN classes ON sellers.classId = classes.id").all();
+      
+      res.end(JSON.stringify({
+        books: books
+      }));
+    } break;
+    case "/changeBookPrice": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.id === "number" && db.prepare("SELECT 1 FROM books WHERE id = ?").get(data.id) &&
+          typeof data.price === "number") {
+        db.prepare("UPDATE books SET price = ? WHERE id = ?").run(data.price, data.id);
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let books = db.prepare("SELECT books.id, books.title, books.sellerId, sellers.name, sellers.surname, classes.name AS className, books.price, books.sold FROM books JOIN sellers ON books.sellerId = sellers.id JOIN classes ON sellers.classId = classes.id").all();
+      
+      res.end(JSON.stringify({
+        books: books
+      }));
     } break;
     case "/getBookTitles": {
       if (!checkAuth(req) || req.method !== "GET") {
