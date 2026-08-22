@@ -280,6 +280,70 @@ function processRequest(req, data, res) {
         classes: classes
       }));
     } break;
+    case "/getSellers": {
+      if (!checkAuth(req) || req.method !== "GET") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let sellers = db.prepare("SELECT sellers.id, sellers.name, sellers.surname, classes.name AS className, SUM(CASE WHEN books.sold = 1 THEN books.price ELSE 0 END) AS due FROM sellers JOIN classes ON sellers.classId = classes.id JOIN books ON sellers.id = books.sellerId GROUP BY sellers.id").all();
+      
+      res.end(JSON.stringify({
+        sellers: sellers
+      }));
+    } break;
+    case "/getSeller": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.id === "number" && db.prepare("SELECT 1 FROM sellers WHERE id = ?").get(data.id)) {
+        let seller = db.prepare("SELECT sellers.name, sellers.surname, classes.name AS className, SUM(CASE WHEN books.sold = 1 THEN books.price ELSE 0 END) AS due FROM sellers JOIN classes ON sellers.classId = classes.id JOIN books ON sellers.id = books.sellerId WHERE sellers.id = ?").get(data.id);
+        let books = db.prepare("SELECT id, title, price, sold FROM books WHERE sellerId = ?").all(data.id);
+        
+        res.end(JSON.stringify({
+          seller: seller,
+          books: books
+        }));
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+    } break;
+    case "/changeSellerData": {
+      if (!checkAuth(req) || req.method !== "POST") {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      if (typeof data.id === "number" && db.prepare("SELECT 1 FROM sellers WHERE id = ?").get(data.id) &&
+          typeof data.name === "string" && data.name.length > 0 &&
+          typeof data.surname === "string" && data.surname.length > 0 &&
+          typeof data.class === "string" && db.prepare("SELECT 1 FROM classes WHERE name = ?").get(data.class)) {
+        let name = capitalize(data.name.trim());
+        let surname = capitalize(data.surname.trim());
+        let classId = db.prepare("SELECT id FROM classes WHERE name = ?").get(data.class).id;
+        
+        db.prepare("UPDATE sellers SET name = ?, surname = ?, classId = ? WHERE id = ?").run(name, surname, classId, data.id);
+      } else {
+        res.statusCode = 400;
+        res.end();
+        return;
+      }
+      
+      let seller = db.prepare("SELECT sellers.name, sellers.surname, classes.name AS className, SUM(CASE WHEN books.sold = 1 THEN books.price ELSE 0 END) AS due FROM sellers JOIN classes ON sellers.classId = classes.id JOIN books ON sellers.id = books.sellerId WHERE sellers.id = ?").get(data.id);
+      let books = db.prepare("SELECT id, title, price, sold FROM books WHERE sellerId = ?").all(data.id);
+      
+      res.end(JSON.stringify({
+        seller: seller,
+        books: books
+      }));
+    } break;
     case "/getBooks": {
       if (!checkAuth(req) || req.method !== "GET") {
         res.statusCode = 400;
