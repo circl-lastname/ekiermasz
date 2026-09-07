@@ -90,10 +90,10 @@ async function loadClasses() {
 }
 
 function updateClassesDatalist() {
-  idAddBooksClasses.replaceChildren();
+  idDatalistClasses.replaceChildren();
   
   for (let _class of classes) {
-    idAddBooksClasses.append(make("option", { value: _class.name }));
+    idDatalistClasses.append(make("option", { value: _class.name }));
   }
 }
 
@@ -101,10 +101,10 @@ async function loadBookTitles() {
   let response = await request("/getBookTitles");
   
   if (response.status === 200) {
-    idBooksTitles.replaceChildren();
+    idDatalistBookTitles.replaceChildren();
     
     for (let title of response.data.titles) {
-      idBooksTitles.append(make("option", { value: title }));
+      idDatalistBookTitles.append(make("option", { value: title }));
     }
   } else {
     alert("Błąd podczas pobierania tytułów książek");
@@ -218,6 +218,10 @@ idMainAddBooks.addEventListener("click", () => {
   setPage("addBooks");
 });
 
+idMainSellers.addEventListener("click", () => {
+  setPage("sellers");
+});
+
 idMainBooks.addEventListener("click", () => {
   setPage("books");
 });
@@ -279,6 +283,94 @@ lateInit.bookAdded = () => {
 
 idBookAddedAddMore.addEventListener("click", () => {
   setPage("addBooks");
+});
+
+// ---------- sellers
+let sellersList = [];
+let sellersGeneratedDate;
+
+function sellersUpdateTable(updateDate) {
+  if (updateDate) {
+    sellersGeneratedDate = new Date();
+    idSellersGenerated.innerText = `Stan na ${formatDateUser(sellersGeneratedDate)}`;
+  }
+  
+  let surname = idSellersSearchSurname.value.trim().toLowerCase();
+  let name = idSellersSearchName.value.trim().toLowerCase();
+  let className = idSellersSearchClass.value.trim().toUpperCase();
+  
+  idSellersList.replaceChildren();
+  
+  for (let seller of sellersList) {
+    if (surname) {
+      if (!seller.surname.toLowerCase().includes(surname)) {
+        continue;
+      }
+    }
+    
+    if (name) {
+      if (!seller.name.toLowerCase().includes(name)) {
+        continue;
+      }
+    }
+    
+    if (className) {
+      if (seller.className !== className) {
+        continue;
+      }
+    }
+    
+    idSellersList.append(make("tr", 
+      make("td", seller.surname),
+      make("td", seller.name),
+      make("td", seller.className),
+      make("td", `${toPrice(seller.due)} zł`),
+      make("td", { classes: [ "noPrint" ] },
+        makeIconButton("Profil", "assets/24/person-edit.svg", async () => {
+          
+        }),
+      )
+    ));
+  }
+}
+
+init.sellers = async () => {
+  loading(true);
+  
+  if (classes.length === 0) {
+    await loadClasses();
+  }
+  
+  let response = await request("/getSellers");
+  
+  if (response.status === 200) {
+    sellersList = response.data.sellers;
+    sellersUpdateTable(true);
+  } else {
+    idSellersGenerated.innerText = "";
+    sellersList = [];
+    sellersGeneratedDate = undefined;
+    alert("Błąd podczas pobierania sprzedawców");
+  }
+  
+  loading(false);
+};
+
+free.sellers = () => {
+  idSellersList.replaceChildren();
+  idSellersGenerated.innerText = "";
+  sellersList = [];
+  sellersGeneratedDate = undefined;
+};
+
+idSellersPrintButton.addEventListener("click", () => {
+  document.title = `eKiermasz_Sprzedawcy_${formatDateFile(sellersGeneratedDate)}`;
+  print();
+  document.title = "eKiermasz";
+});
+
+idSellersSearchButton.addEventListener("click", () => {
+  sellersUpdateTable(false);
 });
 
 // ---------- books
@@ -391,8 +483,9 @@ init.books = async () => {
     booksList = response.data.books;
     booksUpdateTable(true);
   } else {
-    booksList = [];
     idBooksGenerated.innerText = "";
+    booksList = [];
+    booksGeneratedDate = undefined;
     alert("Błąd podczas pobierania książek");
   }
   
@@ -401,6 +494,7 @@ init.books = async () => {
 
 free.books = () => {
   idBooksList.replaceChildren();
+  idBooksGenerated.innerText = "";
   booksList = [];
   booksGeneratedDate = undefined;
 };

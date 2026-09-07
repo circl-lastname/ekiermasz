@@ -287,7 +287,7 @@ function processRequest(req, data, res) {
         return;
       }
       
-      let sellers = db.prepare("SELECT sellers.id, sellers.name, sellers.surname, classes.name AS className, SUM(CASE WHEN books.sold = 1 THEN books.price ELSE 0 END) AS due FROM sellers JOIN classes ON sellers.classId = classes.id JOIN books ON sellers.id = books.sellerId GROUP BY sellers.id").all();
+      let sellers = db.prepare("SELECT sellers.id, sellers.name, sellers.surname, classes.name AS className, SUM(CASE WHEN books.sold = 1 THEN books.price ELSE 0 END) AS due FROM sellers JOIN classes ON sellers.classId = classes.id JOIN books ON sellers.id = books.sellerId GROUP BY sellers.id ORDER BY className ASC, sellers.surname ASC, sellers.name ASC").all();
       
       res.end(JSON.stringify({
         sellers: sellers
