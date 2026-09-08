@@ -33,17 +33,17 @@
       <div class="page" id="idPage_addBooks">
         <p><button class="fancy goHome"><img src="assets/48/home.svg" width="48" height="48" alt="Strona główna">Strona główna</button></p>
         <h1>Dodaj książki</h1>
-        <p>Dane ksiązki:</p>
-        <p>
-          <input type="text" id="idAddBooksTitle" list="idDatalistBookTitles" placeholder="Tytuł"><br>
-          <input type="text" id="idAddBooksPrice" placeholder="Cena"><br>
-        </p>
-        <p>Dane sprzedawcy:</p>
-        <p>
-          <input type="text" id="idAddBooksSurname" placeholder="Nazwisko"><br>
-          <input type="text" id="idAddBooksName" placeholder="Imię"><br>
-          <input type="text" id="idAddBooksClass" list="idDatalistClasses" placeholder="Klasa"><br>
-        </p>
+        <table>
+          <thead>
+            <tr><th colspan="2">Dane ksiązki</th></tr>
+            <tr><td>Tytuł</td><td><input type="text" id="idAddBooksTitle" list="idDatalistBookTitles"></td></tr>
+            <tr><td>Cena</td><td><input type="text" id="idAddBooksPrice"></td></tr>
+            <tr><th colspan="2">Dane sprzedawcy</th></tr>
+            <tr><td>Nazwisko</td><td><input type="text" id="idAddBooksSurname"></td></tr>
+            <tr><td>Imię</td><td><input type="text" id="idAddBooksName"></td></tr>
+            <tr><td>Klasa</td><td><input type="text" id="idAddBooksClass" list="idDatalistClasses"></td></tr>
+          </thead>
+        </table>
         <p><button id="idAddBooksAdd">Dodaj</button></p>
       </div>
       <div class="page" id="idPage_bookAdded">
@@ -70,6 +70,45 @@
             </tr>
           </thead>
           <tbody id="idSellersList"></tbody>
+        </table>
+      </div>
+      <div class="page" id="idPage_seller">
+        <p><button class="fancy" id="idSellerSellersButton"><img src="assets/48/group.svg" width="48" height="48" alt="Sprzedawcy">Sprzedawcy</button></p>
+        <h1 id="idSellerHeading"></h1>
+        <p>
+          <table>
+            <thead>
+              <tr><th>Nazwisko</th><td><input type="text" id="idSellerSurname"></td></tr>
+              <tr><th>Imię</th><td><input type="text" id="idSellerName"></td></tr>
+              <tr><th>Klasa</th><td><input type="text" id="idSellerClass" list="idDatalistClasses"></td></tr>
+            </thead>
+            <tbody>
+              <tr><th>Należność</th><td class="right" id="idSellerDue"></td></tr>
+            </tbody>
+          </table>
+        </p>
+        <p>
+          <button id="idSellerSave">Zapisz dane</button>
+          <button id="idSellerSave">Scal z innym sprzedawcą</button>
+        </p>
+        <table>
+          <thead>
+            <tr><th>Kod</th><th>Tytuł</th><th>Cena</th><th>Sprzedana</th><th class="noPrint">Czynności</th></tr>
+            <tr class="noPrint">
+              <td><input type="number" id="idSellerSearchId" min="1" max="9999" placeholder="Kod"></td>
+              <td><input type="text" id="idSellerSearchTitle" list="idDatalistBookTitles" placeholder="Tytuł"></td>
+              <td></td>
+              <td>
+                <select id="idSellerSearchSold">
+                  <option>---</option>
+                  <option>Tak</option>
+                  <option>Nie</option>
+                </select>
+              </td>
+              <td><button id="idSellerSearchButton">Szukaj</button></td>
+            </tr>
+          </thead>
+          <tbody id="idSellerBooksList"></tbody>
         </table>
       </div>
       <div class="page" id="idPage_books">

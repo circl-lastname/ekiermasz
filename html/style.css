@@ -123,6 +123,10 @@ thead td {
   background-color: #e0e0e0;
 }
 
+.right {
+  text-align: right;
+}
+
 @media print {
   header, button.fancy, .noPrint {
     display: none;

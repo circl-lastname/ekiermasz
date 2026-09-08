@@ -324,10 +324,10 @@ function sellersUpdateTable(updateDate) {
       make("td", seller.surname),
       make("td", seller.name),
       make("td", seller.className),
-      make("td", `${toPrice(seller.due)} zł`),
+      make("td", { classes: [ "right" ] }, `${toPrice(seller.due)} zł`),
       make("td", { classes: [ "noPrint" ] },
         makeIconButton("Profil", "assets/24/person-edit.svg", async () => {
-          
+          setPage("seller", seller.id);
         }),
       )
     ));
@@ -373,6 +373,143 @@ idSellersSearchButton.addEventListener("click", () => {
   sellersUpdateTable(false);
 });
 
+// ---------- seller
+let sellerId;
+let sellerBooksList = [];
+
+function sellerBooksUpdateTable() {
+  idSellerBooksList.replaceChildren();
+  
+  for (let book of sellerBooksList) {
+    if (idSellerSearchId.value) {
+      if (book.id !== parseInt(idSellerSearchId.value)) {
+        continue;
+      }
+    }
+    
+    if (idSellerSearchTitle.value) {
+      if (book.title !== idSellerSearchTitle.value) {
+        continue;
+      }
+    }
+    
+    if (idSellerSearchSold.value !== "---") {
+      if (!!book.sold !== (idSellerSearchSold.value === "Tak")) {
+        continue;
+      }
+    }
+    
+    idSellerBooksList.append(make("tr",
+      make("td", book.id.toString().padStart(3, "0")),
+      make("td", book.title),
+      make("td", { classes: [ "right" ] }, `${toPrice(book.price)} zł`),
+      make("td", book.sold ? "Tak" : "Nie"),
+      make("td", { classes: [ "noPrint" ] },
+        makeIconButton("Zmień tytuł", "assets/24/edit.svg", async () => {
+          let answer = prompt(`Nowy tytuł książki ${book.id.toString().padStart(3, "0")}?`, book.title);
+          
+          if (answer !== null) {
+            loading(true);
+            
+            let response = await request("/changeBookTitle", { id: book.id, title: answer });
+            
+            if (response.status === 200) {
+              init.seller(sellerId);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas zmiany tytułu książki");
+            }
+          }
+        }),
+        makeIconButton("Zmień cenę", "assets/24/price-change.svg", async () => {
+          let answer = prompt(`Nowa cena książki ${book.id.toString().padStart(3, "0")}?`, toPrice(book.price));
+          
+          if (answer !== null) {
+            loading(true);
+            
+            let response = await request("/changeBookPrice", { id: book.id, price: parsePrice(answer) });
+            
+            if (response.status === 200) {
+              init.seller(sellerId);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas zmiany ceny książki");
+            }
+          }
+        }),
+        makeIconButton("Usuń", "assets/24/delete.svg", async () => {
+          if (confirm(`Na pewno usunąć książkę ${book.id.toString().padStart(3, "0")}?`)) {
+            loading(true);
+            
+            let response = await request("/deleteBook", { id: book.id });
+            
+            if (response.status === 200) {
+              init.seller(sellerId);
+              loading(false);
+            } else {
+              loading(false);
+              alert("Błąd podczas usuwania książki");
+            }
+          }
+        }),
+      )
+    ));
+  }
+}
+
+init.seller = async (id) => {
+  loading(true);
+  
+  idSellerHeading.innerText = "\xa0";
+  idSellerSurname.value = "";
+  idSellerName.value = "";
+  idSellerClass.value = "";
+  idSellerDue.value = "";
+  
+  await loadBookTitles();
+  
+  if (classes.length === 0) {
+    await loadClasses();
+  }
+  
+  let response = await request("/getSeller", { id: id });
+  
+  if (response.status === 200) {
+    let seller = response.data.seller;
+    idSellerHeading.innerText = `${seller.surname}, ${seller.name} (${seller.className})`;
+    idSellerSurname.value = seller.surname;
+    idSellerName.value = seller.name;
+    idSellerClass.value = seller.className;
+    idSellerDue.innerText = `${toPrice(seller.due)} zł`;
+    
+    sellerId = id;
+    sellerBooksList = response.data.books;
+    sellerBooksUpdateTable();
+  } else {
+    sellerId = undefined;
+    sellerBooksList = [];
+    alert("Błąd podczas pobierania sprzedawcy");
+  }
+  
+  loading(false);
+};
+
+free.sellers = () => {
+  idSellerBooksList.replaceChildren();
+  sellerId = undefined;
+  sellerBooksList = [];
+};
+
+idSellerSellersButton.addEventListener("click", () => {
+  setPage("sellers");
+});
+
+idSellerSearchButton.addEventListener("click", () => {
+  sellerBooksUpdateTable(sellerId);
+});
+
 // ---------- books
 let booksList = [];
 let booksGeneratedDate;
@@ -407,8 +544,8 @@ function booksUpdateTable(updateDate) {
     idBooksList.append(make("tr",
       make("td", book.id.toString().padStart(3, "0")),
       make("td", book.title),
-      make("td", make("a", { href: "javascript:void(0);" }, `${book.surname}, ${book.name} (${book.className})`)),
-      make("td", `${toPrice(book.price)} zł`),
+      make("td", make("a", { href: "javascript:void(0);", onclick: () => { setPage("seller", book.sellerId) } }, `${book.surname}, ${book.name} (${book.className})`)),
+      make("td", { classes: [ "right" ] }, `${toPrice(book.price)} zł`),
       make("td", book.sold ? "Tak" : "Nie"),
       make("td", { classes: [ "noPrint" ] },
         makeIconButton("Zmień tytuł", "assets/24/edit.svg", async () => {
