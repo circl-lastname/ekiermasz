@@ -258,7 +258,7 @@ idAddBooksAdd.addEventListener("click", async () => {
     title: idAddBooksTitle.value,
     name: idAddBooksName.value,
     surname: idAddBooksSurname.value,
-    class: idAddBooksClass.value.toUpperCase().trim(),
+    class: idAddBooksClass.value.trim().toUpperCase(),
     price: price
   });
   
@@ -289,7 +289,7 @@ idBookAddedAddMore.addEventListener("click", () => {
 let sellersList = [];
 let sellersGeneratedDate;
 
-function sellersUpdateTable(updateDate) {
+function sellersUpdateTable(updateDate, sellerId) {
   if (updateDate) {
     sellersGeneratedDate = new Date();
     idSellersGenerated.innerText = `Stan na ${formatDateUser(sellersGeneratedDate)}`;
@@ -496,7 +496,7 @@ init.seller = async (id) => {
   loading(false);
 };
 
-free.sellers = () => {
+free.seller = () => {
   idSellerBooksList.replaceChildren();
   sellerId = undefined;
   sellerBooksList = [];
@@ -504,6 +504,37 @@ free.sellers = () => {
 
 idSellerSellersButton.addEventListener("click", () => {
   setPage("sellers");
+});
+
+idSellerSaveButton.addEventListener("click", async () => {
+  loading(true);
+  
+  let response = await request("/changeSellerData", {
+    id: sellerId,
+    name: idSellerName.value,
+    surname: idSellerSurname.value,
+    class: idSellerClass.value.trim().toUpperCase()
+  });
+  
+  if (response.status === 200) {
+    let seller = response.data.seller;
+    idSellerHeading.innerText = `${seller.surname}, ${seller.name} (${seller.className})`;
+    idSellerSurname.value = seller.surname;
+    idSellerName.value = seller.name;
+    idSellerClass.value = seller.className;
+    idSellerDue.innerText = `${toPrice(seller.due)} zł`;
+    
+    sellerBooksList = response.data.books;
+    sellerBooksUpdateTable();
+  } else {
+    alert("Błąd podczas zapisu danych sprzedawcy");
+  }
+  
+  loading(false);
+});
+
+idSellerMergeButton.addEventListener("click", () => {
+  setPage("sellers", sellerId);
 });
 
 idSellerSearchButton.addEventListener("click", () => {
