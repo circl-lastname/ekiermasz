@@ -534,12 +534,35 @@ idSellerSaveButton.addEventListener("click", async () => {
 });
 
 idSellerMergeButton.addEventListener("click", () => {
-  setPage("sellers", sellerId);
+  setPage("mergeSeller", sellerId, idSellerHeading.innerText);
 });
 
 idSellerSearchButton.addEventListener("click", () => {
   sellerBooksUpdateTable(sellerId);
 });
+
+// ---------- mergeSeller
+init.mergeSeller = async (id, name) => {
+  idMergeSellerHeading.innerText = `Scalanie sprzedawcy do ${name}`;
+  
+  loading(true);
+  
+  if (classes.length === 0) {
+    await loadClasses();
+  }
+  
+  let response = await request("/getSellers");
+  
+  if (response.status === 200) {
+    //sellersList = response.data.sellers;
+    //sellersUpdateTable(true);
+  } else {
+    //sellersList = [];
+    alert("Błąd podczas pobierania sprzedawców");
+  }
+  
+  loading(false);
+};
 
 // ---------- books
 let booksList = [];
